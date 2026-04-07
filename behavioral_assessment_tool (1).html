@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Behavioral Function Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--navy:#1a2744;--navy-mid:#2a3d6b;--border:#e2e6ef;--white:#fff;--text:#1a2744;--muted:#6b7a99;--light:#f0f2f7;--amber-light:#fef3dc;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(26,39,68,.08),0 4px 12px rgba(26,39,68,.06)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#f4f6fb;color:var(--text);line-height:1.6;min-height:100vh}
+/* header */
+.hdr{background:var(--navy);position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.hdr-in{max-width:1020px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:58px}
+.logo{font-family:'DM Serif Display',serif;font-size:18px;color:#fff}.logo span{color:#5ecfab}
+.hdr-badge{font-size:11px;font-weight:500;color:#a0aec8;border:1px solid #2a3d6b;padding:3px 10px;border-radius:20px;letter-spacing:.04em}
+/* layout */
+.wrap{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
+.notice{background:var(--amber-light);border:1px solid #f6d860;border-radius:var(--radius);padding:10px 16px;font-size:12px;color:#7c5200;margin-bottom:18px;display:flex;gap:10px;line-height:1.5}
+/* cards */
+.card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:18px;box-shadow:var(--shadow);overflow:hidden}
+.card-hdr{padding:16px 24px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.card-hdr-left{display:flex;align-items:center;gap:12px}
+.card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.card-hdr h2{font-size:14px;font-weight:600;color:var(--navy)}
+.card-hdr p{font-size:11px;color:var(--muted);margin-top:1px}
+.card-body{padding:20px 24px}
+/* tool/behavior selector */
+.sel-grid{display:grid;gap:12px}
+.sel-grid.cols3{grid-template-columns:repeat(3,1fr)}
+.sel-grid.cols4{grid-template-columns:repeat(4,1fr)}
+.opt{border:2px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:all .14s;background:var(--white);position:relative}
+.opt:hover{border-color:#93b0d8;background:#f8faff}
+.opt.active{border-color:var(--navy-mid);background:#edf2fc}
+.opt.active::after{content:'✓';position:absolute;top:9px;right:11px;font-size:12px;font-weight:700;color:var(--navy-mid)}
+.opt-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:7px;font-size:13px}
+.opt h3{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:2px}
+.opt p{font-size:11px;color:var(--muted);line-height:1.3}
+/* meta inputs */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.fg input{padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);background:var(--light);transition:border-color .12s}
+.fg input:focus{outline:none;border-color:var(--navy-mid);background:#fff}
+/* behavior tabs */
+.beh-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.beh-tab{padding:8px 20px;border-radius:var(--radius);border:1.5px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;background:var(--white);color:var(--muted);transition:all .12s;font-family:inherit}
+.beh-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* scale hint */
+.scale-hint{display:flex;gap:10px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.scale-hint span{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.sdot{width:20px;height:20px;border-radius:50%;background:var(--light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted)}
+/* questions */
+.q-row{display:flex;align-items:center;gap:10px;padding:9px 24px;border-bottom:1px solid #f0f2f7;transition:background .08s}
+.q-row:last-child{border-bottom:none}
+.q-row:hover{background:#fafbfd}
+.q-num{font-size:11px;font-weight:600;color:var(--muted);min-width:22px;text-align:right;flex-shrink:0}
+.q-text{flex:1;font-size:13px;color:var(--text);line-height:1.4}
+/* radio */
+.rrow{display:flex;gap:4px;flex-shrink:0}
+.ri{position:relative}
+.ri input[type=radio]{position:absolute;opacity:0;width:0;height:0}
+.ri label{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .12s;background:var(--light);user-select:none}
+.ri label:hover{border-color:var(--navy-mid);color:var(--navy);background:#edf2fc}
+/* fast/mas buttons */
+.fbtns{display:flex;gap:5px;flex-shrink:0}
+.fbtn{padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;background:var(--light);color:var(--muted);transition:all .12s;font-family:inherit}
+.fbtn:hover{border-color:#93b0d8;color:var(--navy);background:#edf2fc}
+.fbtn.ay{background:#1d9e75;color:#fff;border-color:#1d9e75}
+.fbtn.an{background:#b5384e;color:#fff;border-color:#b5384e}
+.fbtn.ana{background:#4a5568;color:#fff;border-color:#4a5568}
+/* MAS radio (1-6) */
+.mas-scale{display:flex;gap:3px;flex-shrink:0}
+.mas-scale .ri label{width:26px;height:26px;font-size:10px}
+/* action buttons */
+.action-row{display:flex;gap:12px;align-items:center;margin-bottom:28px;flex-wrap:wrap}
+.btn-primary{padding:11px 28px;border-radius:var(--radius);border:none;background:var(--navy);color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .12s;box-shadow:0 2px 8px rgba(26,39,68,.25)}
+.btn-primary:hover{background:var(--navy-mid)}
+.btn-sec{padding:11px 20px;border-radius:var(--radius);border:1.5px solid var(--border);background:#fff;color:var(--muted);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .12s}
+.btn-sec:hover{border-color:#93b0d8;color:var(--navy)}
+.btn-act{padding:8px 15px;border-radius:var(--radius);border:1.5px solid var(--border);background:#fff;color:var(--navy);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-act:hover{border-color:var(--navy-mid);background:#f0f4ff}
+.btn-act.ok{border-color:#1d9e75;color:#1d9e75;background:#f0fdf8}
+/* results */
+#results{display:none}
+.res-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:4px}
+.res-meta{font-size:13px;color:var(--muted);margin-bottom:16px}
+.export-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding:14px 18px;background:var(--white);border-radius:var(--radius);border:1px solid var(--border);align-items:center}
+.export-lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:4px}
+/* score display */
+.score-grid{display:grid;gap:10px;margin-bottom:18px}
+.sc{background:var(--light);border-radius:var(--radius);padding:12px 10px;text-align:center;border:1px solid var(--border)}
+.sc-lbl{font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px;letter-spacing:.03em;text-transform:uppercase;line-height:1.3}
+.sc-val{font-size:24px;font-weight:600;line-height:1}
+.sc-max{font-size:11px;color:var(--muted);margin-top:2px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-lbl{font-size:12px;color:var(--muted)}
+.bar-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.bar-val{font-size:12px;font-weight:600;color:var(--navy);min-width:28px;text-align:right}
+/* chart wrapper with copy button */
+.chart-block{position:relative;margin-top:20px}
+.chart-copy-btn{position:absolute;top:0;right:0;z-index:10}
+.chart-wrap{position:relative;width:100%;height:240px}
+.chart-wrap-tall{position:relative;width:100%;height:300px}
+/* narrative */
+.narrative-box{font-size:13.5px;color:var(--text);line-height:1.9;background:#f8fafd;border-radius:var(--radius);padding:20px 22px;border:1px solid var(--border);white-space:pre-wrap;font-family:'DM Sans',system-ui,sans-serif}
+.dom-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-right:8px;margin-bottom:8px}
+.legend-row{display:flex;gap:20px;font-size:12px;color:var(--muted);margin-bottom:12px;flex-wrap:wrap}
+.legend-row span{display:flex;align-items:center;gap:6px}
+.lswatch{display:inline-block;width:12px;height:12px;border-radius:2px}
+/* section divider */
+.res-section-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+@media print{.hdr,.tool-selector-card,#entry-section,.action-row,.export-bar,.back-btn{display:none!important}body{background:#fff}#results{display:block!important}.card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}}
+@media(max-width:680px){.sel-grid.cols3,.sel-grid.cols4{grid-template-columns:1fr 1fr}.meta-grid{grid-template-columns:1fr}.scale-hint{display:none}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-in">
+    <div class="logo">Behavioral<span>FX</span></div>
+    <span class="hdr-badge">QABF · FAST · MAS Assessment Tool</span>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="notice">
+  <span style="flex-shrink:0">⚠</span>
+  <div><strong>HIPAA notice:</strong> This tool runs entirely in your browser. No data is stored or transmitted anywhere. No internet connection is required after page load. Use initials or a client ID — never full names. All data clears on page close or refresh. Written summaries contain no identifying information.</div>
+</div>
+
+<!-- ══ ENTRY SECTION ══════════════════════════════════════ -->
+<div id="entry-section">
+
+<!-- Tool selector -->
+<div class="card tool-selector-card">
+  <div class="card-hdr"><div class="card-hdr-left"><div class="card-icon" style="background:#edf2fc">⚙</div><div><h2>Assessment configuration</h2><p>Select tools, number of behaviors, and enter session info</p></div></div></div>
+  <div class="card-body">
+
+    <div style="margin-bottom:14px"><div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Assessment tools</div>
+    <div class="sel-grid cols4" id="tool-opts">
+      <div class="opt active" id="opt-qabf" onclick="toggleTool('qabf')"><div class="opt-icon" style="background:#dbeafe">📋</div><h3>QABF</h3><p>25 items · 0–3 scale<br>5 functions</p></div>
+      <div class="opt active" id="opt-fast" onclick="toggleTool('fast')"><div class="opt-icon" style="background:#dcfce7">🔍</div><h3>FAST</h3><p>16 Yes/No items<br>4 categories</p></div>
+      <div class="opt active" id="opt-mas"  onclick="toggleTool('mas')"><div class="opt-icon" style="background:#f3e8ff">📊</div><h3>MAS</h3><p>16 items · 0–6 scale<br>4 functions</p></div>
+    </div></div>
+
+    <div style="margin-bottom:14px"><div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Number of behaviors</div>
+    <div class="sel-grid cols3" style="max-width:440px">
+      <div class="opt active" id="opt-b1" onclick="setBehaviorCount(1)"><div class="opt-icon" style="background:#fef3dc">1️⃣</div><h3>One behavior</h3><p>Single target behavior</p></div>
+      <div class="opt" id="opt-b2" onclick="setBehaviorCount(2)"><div class="opt-icon" style="background:#fdeef1">2️⃣</div><h3>Two behaviors</h3><p>Separate scores per behavior</p></div>
+    </div></div>
+
+    <div class="meta-grid">
+      <div class="fg"><label>Client ID / Initials</label><input id="inp-client" placeholder="e.g. J.D. or Client #42"/></div>
+      <div class="fg"><label>Informant / Staff</label><input id="inp-staff" placeholder="e.g. Direct care staff"/></div>
+      <div class="fg"><label>Target behavior 1</label><input id="inp-beh1" placeholder="e.g. Self-injurious behavior"/></div>
+      <div class="fg" id="beh2-field" style="display:none"><label>Target behavior 2</label><input id="inp-beh2" placeholder="e.g. Aggression"/></div>
+      <div class="fg"><label>Date of assessment</label><input id="inp-date" type="date"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- Behavior tabs (shown when 2 behaviors) -->
+<div id="beh-tab-bar" style="display:none">
+  <div class="beh-tabs">
+    <button class="beh-tab active" id="btab-0" onclick="switchBehTab(0)">Behavior 1</button>
+    <button class="beh-tab" id="btab-1" onclick="switchBehTab(1)">Behavior 2</button>
+  </div>
+</div>
+
+<!-- QABF section -->
+<div id="section-qabf" class="card">
+  <div class="card-hdr">
+    <div class="card-hdr-left"><div class="card-icon" style="background:#dbeafe">📋</div><div><h2>QABF — Questions About Behavioral Function</h2><p>Vollmer &amp; Matson · Items in original questionnaire order</p></div></div>
+    <div class="scale-hint"><span><div class="sdot">X</div>N/A</span><span><div class="sdot">0</div>Never</span><span><div class="sdot">1</div>Rarely</span><span><div class="sdot">2</div>Sometimes</span><span><div class="sdot">3</div>Often</span></div>
+  </div>
+  <div id="qabf-list"></div>
+</div>
+
+<!-- FAST section -->
+<div id="section-fast" class="card">
+  <div class="card-hdr"><div class="card-hdr-left"><div class="card-icon" style="background:#dcfce7">🔍</div><div><h2>FAST — Functional Analysis Screening Tool</h2><p>Florida Center on Self-Injury · Items in original questionnaire order</p></div></div></div>
+  <div id="fast-list"></div>
+</div>
+
+<!-- MAS section -->
+<div id="section-mas" class="card">
+  <div class="card-hdr">
+    <div class="card-hdr-left"><div class="card-icon" style="background:#f3e8ff">📊</div><div><h2>MAS — Motivation Assessment Scale</h2><p>Durand &amp; Crimmins · Rate each item 0–6</p></div></div>
+    <div class="scale-hint"><span><div class="sdot">0</div>Never</span><span><div class="sdot">1</div>Almost never</span><span><div class="sdot">2</div>Seldom</span><span><div class="sdot">3</div>Half the time</span><span><div class="sdot">4</div>Usually</span><span><div class="sdot">5</div>Almost always</span><span><div class="sdot">6</div>Always</span></div>
+  </div>
+  <div id="mas-list"></div>
+</div>
+
+<div class="action-row">
+  <button class="btn-primary" onclick="calculate()">Calculate results</button>
+  <button class="btn-sec" onclick="resetAll()">Reset all</button>
+</div>
+
+</div><!-- /entry-section -->
+
+<!-- ══ RESULTS ════════════════════════════════════════════ -->
+<div id="results">
+  <div class="res-title">Assessment results</div>
+  <div class="res-meta" id="res-meta"></div>
+
+  <div class="export-bar">
+    <span class="export-lbl">Export</span>
+    <button class="btn-act" onclick="copyAllText()" id="btn-copy-all">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy all results text
+    </button>
+    <button class="btn-act" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print / Save PDF
+    </button>
+  </div>
+
+  <div id="results-body"></div>
+
+  <!-- Narrative -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hdr-left"><div class="card-icon" style="background:#edf2fc">📝</div><div><h2>Written summary</h2><p>Generated from scores only — no identifying information</p></div></div>
+      <button class="btn-act" onclick="copyNarrative()" id="btn-copy-narr">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy narrative
+      </button>
+    </div>
+    <div class="card-body"><div class="narrative-box" id="narrative-box"></div></div>
+  </div>
+
+  <div class="back-btn" style="margin-top:12px">
+    <button class="btn-sec" onclick="window.scrollTo({top:0,behavior:'smooth'})">← Back to top</button>
+  </div>
+</div>
+</div><!-- /wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+const QABF_Q=[
+  {n:1,c:"att",t:"Engages in the behavior to get attention."},
+  {n:2,c:"esc",t:"Engages in the behavior to escape work or learning situations."},
+  {n:3,c:"non",t:'Engages in the behavior as a form of "self-stimulation".'},
+  {n:4,c:"phy",t:"Engages in the behavior because he/she is in pain."},
+  {n:5,c:"tan",t:"Engages in the behavior to get access to items such as preferred toys, food or beverages."},
+  {n:6,c:"att",t:"Engages in the behavior because he/she likes to be reprimanded."},
+  {n:7,c:"esc",t:"Engages in the behavior when asked to do something (brush teeth, work, etc.)"},
+  {n:8,c:"non",t:"Engages in the behavior even if he/she thinks no one is in the room."},
+  {n:9,c:"phy",t:"Engages in the behavior more frequently when he/she is ill."},
+  {n:10,c:"tan",t:"Engages in the behavior when you take something away from him/her."},
+  {n:11,c:"att",t:"Engages in the behavior to draw attention to him/herself."},
+  {n:12,c:"esc",t:"Engages in the behavior when he/she does not want to do something."},
+  {n:13,c:"non",t:"Engages in the behavior because there is nothing else to do."},
+  {n:14,c:"phy",t:"Engages in the behavior when there is something bothering her/him physically."},
+  {n:15,c:"tan",t:"Engages in the behavior when you have something he/she wants."},
+  {n:16,c:"att",t:"Engages in the behavior to try to get a reaction from you."},
+  {n:17,c:"esc",t:"Engages in the behavior to try to get people to leave him/her alone."},
+  {n:18,c:"non",t:"Engages in the behavior in a highly repetitive manner, ignoring this/her surroundings."},
+  {n:19,c:"phy",t:"Engages in the behavior because she/he is physically uncomfortable."},
+  {n:20,c:"tan",t:"Engages in the behavior when a peer has something he/she wants."},
+  {n:21,c:"att",t:'Does he/she seem to be saying "come see me" or "look at me" when engaging in the behavior?'},
+  {n:22,c:"esc",t:'Does he/she seem to be saying "leave me alone" or "stop asking me to do this" when engaging in the behavior?'},
+  {n:23,c:"non",t:"Does he/she seem to enjoy the behavior, even if no one is around?"},
+  {n:24,c:"phy",t:"Does the behavior seem to indicate to you that he/she is not feeling well?"},
+  {n:25,c:"tan",t:'Does he/she seem to be saying "give me that (toy, item, food)" when engaging in the behavior?'},
+];
+const FAST_Q=[
+  {n:1,c:"soc",t:"Does the client usually engage in the problem behavior when he/she is being ignored or when caregivers are paying attention to someone else?"},
+  {n:2,c:"soc",t:"Does the client usually engage in the problem behavior when requests for preferred activities [games, snacks] are denied or when these items are taken away?"},
+  {n:3,c:"soc",t:"When the problem behavior occurs, do you or other caregivers usually try to calm the client down or try to engage the client in preferred activities?"},
+  {n:4,c:"soc",t:"Is the client usually well behaved when he/she is getting lots of attention or when preferred items or activities are freely available?"},
+  {n:5,c:"esc",t:"Is the client resistant when asked to perform a task or to participate in group activities?"},
+  {n:6,c:"esc",t:"Does the client usually engage in the problem behavior when asked to perform a task or to participate in group activities?"},
+  {n:7,c:"esc",t:"When the problem behavior occurs, is the client usually given a break from tasks?"},
+  {n:8,c:"esc",t:"Is the client usually well behaved when he/she is not required to do anything?"},
+  {n:9,c:"auto",t:'Does the problem behavior seem to be a "ritual" or habit, repeatedly occurring the same way?'},
+  {n:10,c:"auto",t:"Does the client usually engage in the problem behavior even when no one is around or watching?"},
+  {n:11,c:"auto",t:"Does the client prefer engaging in the problem behavior over other types of leisure activities?"},
+  {n:12,c:"auto",t:"Does the problem behavior appear to provide some sort of sensory stimulation?"},
+  {n:13,c:"pain",t:"Does the client usually engage in the problem behavior more often when he/she is ill?"},
+  {n:14,c:"pain",t:"Is the problem behavior cyclical, occurring at high rates for several days and then stopping?"},
+  {n:15,c:"pain",t:"Does the client have recurrent painful conditions such as ear infections or allergies? If so, please list."},
+  {n:16,c:"pain",t:"If the client is experiencing physical problems, and these are treated, does the problem behavior usually go away?"},
+];
+// MAS — Durand & Crimmins (exact original items)
+const MAS_Q=[
+  {n:1,c:"sen",t:"Would the behavior occur continuously, over and over, if this person was left alone for long periods of time? (For example, several hours)"},
+  {n:2,c:"esc",t:"Does the behavior occur following a request to perform a difficult task?"},
+  {n:3,c:"att",t:"Does the behavior seem to occur in response to your talking to other persons in the room?"},
+  {n:4,c:"tan",t:"Does the behavior ever occur to get a toy, food, or activity that this person has been told that he/she can't have?"},
+  {n:5,c:"sen",t:"Does the behavior occur when any request is made of this person?"},
+  {n:6,c:"esc",t:"Does the behavior seem to occur in response to your talking to other persons in the room?"},
+  {n:7,c:"att",t:"Does the behavior occur whenever you stop attending to this person?"},
+  {n:8,c:"tan",t:"Does the behavior occur when you take away a favorite toy, food, or activity?"},
+  {n:9,c:"sen",t:"Does it appear to you that this person enjoys performing the behavior? (It seems to be pleasurable to the person.)"},
+  {n:10,c:"esc",t:"Does this person seem to do the behavior to upset or annoy you when you are trying to get him/her to do what you want?"},
+  {n:11,c:"att",t:"Does this person seem to do the behavior to upset or annoy you when you are not paying attention to him/her?"},
+  {n:12,c:"tan",t:"Does the behavior stop occurring shortly after you give this person the toy, food, or activity he/she has requested?"},
+  {n:13,c:"sen",t:"Does the behavior occur when this person has nothing to do?"},
+  {n:14,c:"esc",t:"Does the behavior occur when you take away a favorite toy, food, or activity?"},
+  {n:15,c:"att",t:"Does the behavior appear to be a form of self-stimulation? (i.e., the behavior seems to provide this person with a form of sensory feedback)"},
+  {n:16,c:"tan",t:"Does the behavior stop occurring shortly after (one to five minutes) you stop working with this person?"},
+];
+// Note: MAS item 5 and 6 are intentional repeats in the original instrument for reliability; items are presented as-is.
+
+const CM={
+  // QABF
+  att:{lbl:"Attention",     color:"#1e40af",bar:"#3b82f6"},
+  esc:{lbl:"Escape",        color:"#92400e",bar:"#f59e0b"},
+  non:{lbl:"Non-social",    color:"#166534",bar:"#22c55e"},
+  phy:{lbl:"Physical",      color:"#9f1239",bar:"#f43f5e"},
+  tan:{lbl:"Tangible",      color:"#6b21a8",bar:"#a855f7"},
+  // FAST
+  soc:{lbl:"Social Reinf.", color:"#1e40af",bar:"#3b82f6"},
+  auto:{lbl:"Sensory/Auto", color:"#166534",bar:"#22c55e"},
+  pain:{lbl:"Pain Atten.",  color:"#9f1239",bar:"#f43f5e"},
+  // MAS
+  sen:{lbl:"Sensory",       color:"#0e7490",bar:"#06b6d4"},
+};
+const FAST_FULL={soc:"Attention/Preferred Items [Social]",esc:"Escape [Social]",auto:"Sensory Stimulation [Automatic]",pain:"Pain Attenuation [Automatic]"};
+const MAS_FULL={sen:"Sensory",esc:"Escape",att:"Attention",tan:"Tangible"};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let activeTools={qabf:true,fast:true,mas:true};
+let behaviorCount=1;
+let currentBehTab=0; // 0 or 1
+
+// scores[behIndex][tool][cat] = value
+let scores=[
+  {qabf:{},fast:{},mas:{}},
+  {qabf:{},fast:{},mas:{}}
+];
+
+let charts={};
+
+// ═══════════════════════════════════════════════════════════
+// TOOL & BEHAVIOR CONFIG
+// ═══════════════════════════════════════════════════════════
+function toggleTool(t){
+  activeTools[t]=!activeTools[t];
+  document.getElementById('opt-'+t).classList.toggle('active',activeTools[t]);
+  document.getElementById('section-'+t).style.display=activeTools[t]?'block':'none';
+}
+function setBehaviorCount(n){
+  behaviorCount=n;
+  document.getElementById('opt-b1').classList.toggle('active',n===1);
+  document.getElementById('opt-b2').classList.toggle('active',n===2);
+  document.getElementById('beh2-field').style.display=n===2?'flex':'none';
+  document.getElementById('beh-tab-bar').style.display=n===2?'block':'none';
+  if(n===1){currentBehTab=0;renderForms(0);}
+  else{switchBehTab(0);}
+}
+function switchBehTab(idx){
+  currentBehTab=idx;
+  [0,1].forEach(i=>document.getElementById('btab-'+i).classList.toggle('active',i===idx));
+  // Update behavior label in tab
+  const b1=document.getElementById('inp-beh1').value||'Behavior 1';
+  const b2=document.getElementById('inp-beh2').value||'Behavior 2';
+  document.getElementById('btab-0').textContent=b1;
+  document.getElementById('btab-1').textContent=b2;
+  renderForms(idx);
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUILD FORMS
+// ═══════════════════════════════════════════════════════════
+function renderForms(behIdx){
+  buildQABF(behIdx);
+  buildFAST(behIdx);
+  buildMAS(behIdx);
+}
+
+function buildQABF(bi){
+  const el=document.getElementById('qabf-list');el.innerHTML='';
+  const saved=scores[bi].qabf;
+  QABF_Q.forEach(q=>{
+    const row=document.createElement('div');row.className='q-row';
+    const opts=[{v:'x',l:'X'},{v:0,l:'0'},{v:1,l:'1'},{v:2,l:'2'},{v:3,l:'3'}];
+    const curVal=saved[q.n];
+    const radios=opts.map(o=>{
+      const sel=(curVal===null&&o.v==='x')||(curVal===o.v);
+      return `<div class="ri"><input type="radio" name="qabf_${bi}_${q.n}" id="qr_${bi}_${q.n}_${o.v}" value="${o.v}"${sel?' checked':''}><label for="qr_${bi}_${q.n}_${o.v}" style="${sel?(o.v==='x'?'background:#4a5568;color:#fff;border-color:#4a5568':'background:'+CM[q.c].bar+';color:#fff;border-color:'+CM[q.c].bar):''}">${o.l}</label></div>`;
+    }).join('');
+    row.innerHTML=`<span class="q-num">${q.n}.</span><span class="q-text">${q.t}</span><div class="rrow">${radios}</div>`;
+    el.appendChild(row);
+  });
+  QABF_Q.forEach(q=>{
+    [{v:'x'},{v:0},{v:1},{v:2},{v:3}].forEach(o=>{
+      const inp=document.getElementById(`qr_${bi}_${q.n}_${o.v}`);
+      if(!inp)return;
+      inp.addEventListener('change',function(){
+        if(!this.checked)return;
+        scores[bi].qabf[q.n]=this.value==='x'?null:parseInt(this.value);
+        [{v:'x'},{v:0},{v:1},{v:2},{v:3}].forEach(oo=>{
+          const lbl=document.querySelector(`label[for="qr_${bi}_${q.n}_${oo.v}"]`);
+          if(!lbl)return;
+          if(String(oo.v)===this.value){lbl.style.background=oo.v==='x'?'#4a5568':CM[q.c].bar;lbl.style.color='#fff';lbl.style.borderColor=oo.v==='x'?'#4a5568':CM[q.c].bar;}
+          else{lbl.style.background=lbl.style.color=lbl.style.borderColor='';}
+        });
+      });
+    });
+  });
+}
+
+function buildFAST(bi){
+  const el=document.getElementById('fast-list');el.innerHTML='';
+  const saved=scores[bi].fast;
+  FAST_Q.forEach(q=>{
+    const row=document.createElement('div');row.className='q-row';
+    const cur=saved[q.n];
+    row.innerHTML=`<span class="q-num">${q.n}.</span><span class="q-text">${q.t}</span><div class="fbtns"><button class="fbtn${cur==='yes'?' ay':''}" id="fb_${bi}_${q.n}_yes" type="button">Yes</button><button class="fbtn${cur==='no'?' an':''}" id="fb_${bi}_${q.n}_no" type="button">No</button><button class="fbtn${cur==='na'?' ana':''}" id="fb_${bi}_${q.n}_na" type="button">N/A</button></div>`;
+    el.appendChild(row);
+  });
+  FAST_Q.forEach(q=>{
+    ['yes','no','na'].forEach(opt=>{
+      const btn=document.getElementById(`fb_${bi}_${q.n}_${opt}`);
+      if(!btn)return;
+      btn.addEventListener('click',function(){
+        scores[bi].fast[q.n]=opt;
+        ['yes','no','na'].forEach(o=>{const b=document.getElementById(`fb_${bi}_${q.n}_${o}`);if(b){b.classList.remove('ay','an','ana');}});
+        this.classList.add(opt==='yes'?'ay':opt==='no'?'an':'ana');
+      });
+    });
+  });
+}
+
+function buildMAS(bi){
+  const el=document.getElementById('mas-list');el.innerHTML='';
+  const saved=scores[bi].mas;
+  MAS_Q.forEach(q=>{
+    const row=document.createElement('div');row.className='q-row';
+    const cur=saved[q.n];
+    const opts=[0,1,2,3,4,5,6];
+    const radios=opts.map(v=>{
+      const sel=cur===v;
+      return `<div class="ri"><input type="radio" name="mas_${bi}_${q.n}" id="mr_${bi}_${q.n}_${v}" value="${v}"${sel?' checked':''}><label for="mr_${bi}_${q.n}_${v}" style="width:26px;height:26px;font-size:10px;${sel?'background:'+CM[q.c].bar+';color:#fff;border-color:'+CM[q.c].bar:''}">${v}</label></div>`;
+    }).join('');
+    row.innerHTML=`<span class="q-num">${q.n}.</span><span class="q-text">${q.t}</span><div class="rrow mas-scale">${radios}</div>`;
+    el.appendChild(row);
+  });
+  MAS_Q.forEach(q=>{
+    [0,1,2,3,4,5,6].forEach(v=>{
+      const inp=document.getElementById(`mr_${bi}_${q.n}_${v}`);
+      if(!inp)return;
+      inp.addEventListener('change',function(){
+        if(!this.checked)return;
+        scores[bi].mas[q.n]=parseInt(this.value);
+        [0,1,2,3,4,5,6].forEach(vv=>{
+          const lbl=document.querySelector(`label[for="mr_${bi}_${q.n}_${vv}"]`);
+          if(!lbl)return;
+          if(vv===parseInt(this.value)){lbl.style.background=CM[q.c].bar;lbl.style.color='#fff';lbl.style.borderColor=CM[q.c].bar;}
+          else{lbl.style.background=lbl.style.color=lbl.style.borderColor='';}
+        });
+      });
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCORING
+// ═══════════════════════════════════════════════════════════
+function calcQABF(bi){
+  const cats={att:[1,6,11,16,21],esc:[2,7,12,17,22],non:[3,8,13,18,23],phy:[4,9,14,19,24],tan:[5,10,15,20,25]};
+  const r={};const sv=scores[bi].qabf;
+  Object.entries(cats).forEach(([k,ns])=>r[k]=ns.reduce((s,n)=>s+(typeof sv[n]==='number'?sv[n]:0),0));
+  return r;
+}
+function calcFAST(bi){
+  const cats={soc:[1,2,3,4],esc:[5,6,7,8],auto:[9,10,11,12],pain:[13,14,15,16]};
+  const r={};const sv=scores[bi].fast;
+  Object.entries(cats).forEach(([k,ns])=>r[k]=ns.reduce((s,n)=>s+(sv[n]==='yes'?1:0),0));
+  return r;
+}
+function calcMAS(bi){
+  // MAS scoring: sen=items 1,5,9,13  esc=2,6,10,14  att=3,7,11,15  tan=4,8,12,16
+  // Each item 0-6, sum of 4 items = 0-24. Mean = sum/4.
+  const cats={sen:[1,5,9,13],esc:[2,6,10,14],att:[3,7,11,15],tan:[4,8,12,16]};
+  const r={};const sv=scores[bi].mas;
+  Object.entries(cats).forEach(([k,ns])=>{
+    const sum=ns.reduce((s,n)=>s+(typeof sv[n]==='number'?sv[n]:0),0);
+    r[k]={sum,mean:parseFloat((sum/4).toFixed(2))};
+  });
+  return r;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALCULATE & RENDER RESULTS
+// ═══════════════════════════════════════════════════════════
+function killChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+function calculate(){
+  const beh1=document.getElementById('inp-beh1').value||'Behavior 1';
+  const beh2=document.getElementById('inp-beh2').value||'Behavior 2';
+  const staff=document.getElementById('inp-staff').value||'a direct care staff member';
+  const dateVal=document.getElementById('inp-date').value;
+  const dateStr=dateVal?new Date(dateVal+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+  const toolList=[activeTools.qabf&&'QABF',activeTools.fast&&'FAST',activeTools.mas&&'MAS'].filter(Boolean).join(', ');
+
+  document.getElementById('results').style.display='block';
+  document.getElementById('res-meta').textContent=`Tools: ${toolList}  ·  Behavior${behaviorCount>1?'s':''}: ${beh1}${behaviorCount>1?' & '+beh2:''}${dateStr?'  ·  '+dateStr:''}`;
+
+  // Build results body
+  const body=document.getElementById('results-body');body.innerHTML='';
+
+  const behaviors=behaviorCount===2?[{label:beh1,idx:0},{label:beh2,idx:1}]:[{label:beh1,idx:0}];
+  const allResults=[];
+
+  behaviors.forEach(b=>{
+    const qs=activeTools.qabf?calcQABF(b.idx):null;
+    const fs=activeTools.fast?calcFAST(b.idx):null;
+    const ms=activeTools.mas?calcMAS(b.idx):null;
+    allResults.push({label:b.label,idx:b.idx,qs,fs,ms});
+
+    if(behaviorCount===2){
+      const secTitle=document.createElement('div');secTitle.className='res-section-title';secTitle.textContent=`Results — ${b.label}`;body.appendChild(secTitle);
+    }
+    if(qs) body.appendChild(buildQABFResults(qs,b.idx));
+    if(fs) body.appendChild(buildFASTResults(fs,b.idx));
+    if(ms) body.appendChild(buildMASResults(ms,b.idx));
+    if(qs||fs||ms) body.appendChild(buildRanked(qs,fs,ms,b.label,b.idx));
+    if(qs&&fs||qs&&ms||fs&&ms) body.appendChild(buildRadar(qs,fs,ms,b.idx));
+  });
+
+  buildNarrative(allResults,staff,dateStr);
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── Chart copy button ──────────────────────────────────
+function chartCopyBtn(chartId,label){
+  const btn=document.createElement('button');
+  btn.className='btn-act';btn.style.fontSize='11px';
+  btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy ${label}`;
+  btn.onclick=()=>copyChart(chartId,btn);
+  return btn;
+}
+function copyChart(chartId,btn){
+  const c=charts[chartId];if(!c)return;
+  c.canvas.toBlob(blob=>{
+    try{
+      navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(()=>{
+        const orig=btn.innerHTML;btn.classList.add('ok');btn.innerHTML=btn.innerHTML.replace(/Copy.*/,'Copied!');
+        setTimeout(()=>{btn.classList.remove('ok');btn.innerHTML=orig;},2000);
+      });
+    }catch(e){
+      // Fallback: download
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=chartId+'.png';a.click();
+    }
+  });
+}
+
+// ── QABF result card ───────────────────────────────────
+function buildQABFResults(qs,bi){
+  const wrap=document.createElement('div');wrap.className='card';
+  const qKeys=['att','esc','non','phy','tan'];
+  wrap.innerHTML=`<div class="card-hdr"><div class="card-hdr-left"><div class="card-icon" style="background:#dbeafe">📋</div><div><h2>QABF results</h2><p>Score range 0–15 per function</p></div></div></div>`;
+  const body=document.createElement('div');body.className='card-body';
+
+  // score cards
+  const sg=document.createElement('div');sg.className='score-grid';sg.style.gridTemplateColumns='repeat(5,1fr)';
+  qKeys.forEach(k=>{const d=document.createElement('div');d.className='sc';d.innerHTML=`<div class="sc-lbl">${CM[k].lbl}</div><div class="sc-val" style="color:${CM[k].color}">${qs[k]}</div><div class="sc-max">/ 15</div>`;sg.appendChild(d);});
+  body.appendChild(sg);
+
+  // bars
+  const bars=document.createElement('div');bars.style='margin:14px 0 18px';
+  qKeys.forEach(k=>{bars.innerHTML+=`<div class="bar-row"><span class="bar-lbl" style="min-width:90px">${CM[k].lbl}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(qs[k]/15*100)}%;background:${CM[k].bar}"></div></div><span class="bar-val">${qs[k]}</span></div>`;});
+  body.appendChild(bars);
+
+  // chart block
+  const cid='chart-qabf-'+bi;
+  const cb=document.createElement('div');cb.className='chart-block';
+  const copyBtn=chartCopyBtn(cid,'QABF chart');copyBtn.className='btn-act';copyBtn.style='font-size:11px;margin-bottom:8px';
+  cb.appendChild(copyBtn);
+  const cw=document.createElement('div');cw.className='chart-wrap';
+  const canvas=document.createElement('canvas');canvas.id=cid;cw.appendChild(canvas);cb.appendChild(cw);
+  body.appendChild(cb);
+  wrap.appendChild(body);
+
+  killChart(cid);
+  setTimeout(()=>{
+    charts[cid]=new Chart(document.getElementById(cid),{type:'bar',data:{labels:qKeys.map(k=>CM[k].lbl),datasets:[{data:qKeys.map(k=>qs[k]),backgroundColor:qKeys.map(k=>CM[k].bar),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:15,grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6b7a99',stepSize:3}},x:{grid:{display:false},ticks:{color:'#6b7a99'}}}}});
+  },100);
+  return wrap;
+}
+
+// ── FAST result card ───────────────────────────────────
+function buildFASTResults(fs,bi){
+  const wrap=document.createElement('div');wrap.className='card';
+  const fKeys=['soc','esc','auto','pain'];
+  wrap.innerHTML=`<div class="card-hdr"><div class="card-hdr-left"><div class="card-icon" style="background:#dcfce7">🔍</div><div><h2>FAST results</h2><p>"Yes" answers per category (max 4)</p></div></div></div>`;
+  const body=document.createElement('div');body.className='card-body';
+
+  const sg=document.createElement('div');sg.className='score-grid';sg.style.gridTemplateColumns='repeat(4,1fr)';
+  fKeys.forEach(k=>{const d=document.createElement('div');d.className='sc';d.innerHTML=`<div class="sc-lbl">${CM[k].lbl}</div><div class="sc-val" style="color:${CM[k].color}">${fs[k]}</div><div class="sc-max">/ 4</div>`;sg.appendChild(d);});
+  body.appendChild(sg);
+
+  const bars=document.createElement('div');bars.style='margin:14px 0 18px';
+  fKeys.forEach(k=>{bars.innerHTML+=`<div class="bar-row"><span class="bar-lbl" style="min-width:220px;font-size:11px">${FAST_FULL[k]}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(fs[k]/4*100)}%;background:${CM[k].bar}"></div></div><span class="bar-val">${fs[k]}</span></div>`;});
+  body.appendChild(bars);
+
+  const cid='chart-fast-'+bi;
+  const cb=document.createElement('div');cb.className='chart-block';
+  const copyBtn=chartCopyBtn(cid,'FAST chart');copyBtn.style='font-size:11px;margin-bottom:8px';
+  cb.appendChild(copyBtn);
+  const cw=document.createElement('div');cw.className='chart-wrap';
+  const canvas=document.createElement('canvas');canvas.id=cid;cw.appendChild(canvas);cb.appendChild(cw);
+  body.appendChild(cb);wrap.appendChild(body);
+
+  killChart(cid);
+  setTimeout(()=>{
+    charts[cid]=new Chart(document.getElementById(cid),{type:'bar',data:{labels:fKeys.map(k=>CM[k].lbl),datasets:[{data:fKeys.map(k=>fs[k]),backgroundColor:fKeys.map(k=>CM[k].bar),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:4,grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6b7a99',stepSize:1}},x:{grid:{display:false},ticks:{color:'#6b7a99'}}}}});
+  },100);
+  return wrap;
+}
+
+// ── MAS result card ────────────────────────────────────
+function buildMASResults(ms,bi){
+  const wrap=document.createElement('div');wrap.className='card';
+  const mKeys=['sen','esc','att','tan'];
+  wrap.innerHTML=`<div class="card-hdr"><div class="card-hdr-left"><div class="card-icon" style="background:#f3e8ff">📊</div><div><h2>MAS results</h2><p>Mean score per function (0–6 range; sum 0–24)</p></div></div></div>`;
+  const body=document.createElement('div');body.className='card-body';
+
+  const sg=document.createElement('div');sg.className='score-grid';sg.style.gridTemplateColumns='repeat(4,1fr)';
+  mKeys.forEach(k=>{const d=document.createElement('div');d.className='sc';d.innerHTML=`<div class="sc-lbl">${MAS_FULL[k]}</div><div class="sc-val" style="color:${CM[k].color}">${ms[k].mean.toFixed(2)}</div><div class="sc-max">mean (sum ${ms[k].sum}/24)</div>`;sg.appendChild(d);});
+  body.appendChild(sg);
+
+  const bars=document.createElement('div');bars.style='margin:14px 0 18px';
+  mKeys.forEach(k=>{bars.innerHTML+=`<div class="bar-row"><span class="bar-lbl" style="min-width:90px">${MAS_FULL[k]}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(ms[k].mean/6*100)}%;background:${CM[k].bar}"></div></div><span class="bar-val">${ms[k].mean.toFixed(2)}</span></div>`;});
+  body.appendChild(bars);
+
+  const cid='chart-mas-'+bi;
+  const cb=document.createElement('div');cb.className='chart-block';
+  const copyBtn=chartCopyBtn(cid,'MAS chart');copyBtn.style='font-size:11px;margin-bottom:8px';
+  cb.appendChild(copyBtn);
+  const cw=document.createElement('div');cw.className='chart-wrap';
+  const canvas=document.createElement('canvas');canvas.id=cid;cw.appendChild(canvas);cb.appendChild(cw);
+  body.appendChild(cb);wrap.appendChild(body);
+
+  killChart(cid);
+  setTimeout(()=>{
+    charts[cid]=new Chart(document.getElementById(cid),{type:'bar',data:{labels:mKeys.map(k=>MAS_FULL[k]),datasets:[{data:mKeys.map(k=>ms[k].mean),backgroundColor:mKeys.map(k=>CM[k].bar),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:6,grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6b7a99',stepSize:1}},x:{grid:{display:false},ticks:{color:'#6b7a99'}}}}});
+  },100);
+  return wrap;
+}
+
+// ── Ranked summary card ────────────────────────────────
+function buildRanked(qs,fs,ms,label,bi){
+  const wrap=document.createElement('div');wrap.className='card';
+  wrap.innerHTML=`<div class="card-hdr"><div class="card-hdr-left"><div class="card-icon" style="background:#fef3dc">🎯</div><div><h2>Hypothesized function${behaviorCount>1?' — '+label:''}</h2><p>Highest-scoring categories across tools</p></div></div></div>`;
+  const body=document.createElement('div');body.className='card-body';
+
+  function rankBlock(keys,scoresObj,max,lblMap,title,getVal){
+    const vals={};keys.forEach(k=>vals[k]=getVal(scoresObj[k]));
+    const maxScore=Math.max(...keys.map(k=>vals[k]));
+    const sorted=[...keys].sort((a,b)=>vals[b]-vals[a]);
+    const doms=keys.filter(k=>vals[k]===maxScore);
+    const sec=document.createElement('div');sec.style='margin-bottom:20px';
+    const t=document.createElement('div');t.style='font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px';t.textContent=title;sec.appendChild(t);
+    doms.forEach(k=>{const b=document.createElement('span');b.className='dom-badge';b.style=`background:${CM[k].bar}20;color:${CM[k].color};border:1.5px solid ${CM[k].bar}55`;b.textContent=`${lblMap[k]}  ·  ${typeof vals[k]==='number'&&!Number.isInteger(vals[k])?vals[k].toFixed(2):vals[k]}/${max}`;sec.appendChild(b);});
+    const tbl=document.createElement('div');tbl.style='margin-top:12px';
+    sorted.forEach(k=>{const pct=Math.round(vals[k]/max*100);tbl.innerHTML+=`<div class="bar-row"><span class="bar-lbl" style="min-width:${title.includes('FAST')?'220':'90'}px">${lblMap[k]}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${CM[k].bar}"></div></div><span class="bar-val">${typeof vals[k]==='number'&&!Number.isInteger(vals[k])?vals[k].toFixed(2):vals[k]}/${max}</span></div>`;});
+    sec.appendChild(tbl);return sec;
+  }
+  if(qs) body.appendChild(rankBlock(['att','esc','non','phy','tan'],qs,15,{att:'Attention',esc:'Escape',non:'Non-social',phy:'Physical',tan:'Tangible'},'QABF — functions ranked',v=>v));
+  if(fs) body.appendChild(rankBlock(['soc','esc','auto','pain'],fs,4,FAST_FULL,'FAST — functions ranked',v=>v));
+  if(ms) body.appendChild(rankBlock(['sen','esc','att','tan'],ms,6,MAS_FULL,'MAS — functions ranked (mean 0–6)',v=>v.mean));
+  wrap.appendChild(body);return wrap;
+}
+
+// ── Radar card ─────────────────────────────────────────
+function buildRadar(qs,fs,ms,bi){
+  const wrap=document.createElement('div');wrap.className='card';
+  wrap.innerHTML=`<div class="card-hdr"><div class="card-hdr-left"><div class="card-icon" style="background:#f3e8ff">🕸</div><div><h2>Cross-tool radar</h2><p>All tools mapped together (scaled 0–15)</p></div></div></div>`;
+  const body=document.createElement('div');body.className='card-body';
+
+  const legend=document.createElement('div');legend.className='legend-row';
+  if(qs) legend.innerHTML+=`<span><span class="lswatch" style="background:#1a2744"></span>QABF (0–15)</span>`;
+  if(fs) legend.innerHTML+=`<span><span class="lswatch" style="background:#c47f17"></span>FAST (scaled)</span>`;
+  if(ms) legend.innerHTML+=`<span><span class="lswatch" style="background:#0e7490"></span>MAS (scaled)</span>`;
+  body.appendChild(legend);
+
+  const cid='chart-radar-'+bi;
+  const cb=document.createElement('div');cb.className='chart-block';
+  const copyBtn=chartCopyBtn(cid,'radar chart');copyBtn.style='font-size:11px;margin-bottom:8px';
+  cb.appendChild(copyBtn);
+  const cw=document.createElement('div');cw.className='chart-wrap-tall';
+  const canvas=document.createElement('canvas');canvas.id=cid;cw.appendChild(canvas);cb.appendChild(cw);
+  body.appendChild(cb);wrap.appendChild(body);
+
+  const labels=['Attention / Social','Escape','Non-social / Sensory','Physical / Pain','Tangible'];
+  const datasets=[];
+  if(qs) datasets.push({label:'QABF',data:[qs.att,qs.esc,qs.non,qs.phy,qs.tan],borderColor:'#1a2744',backgroundColor:'rgba(26,39,68,0.1)',pointBackgroundColor:'#1a2744',borderWidth:2});
+  if(fs) datasets.push({label:'FAST',data:[fs.soc/4*15,fs.esc/4*15,fs.auto/4*15,fs.pain/4*15,0],borderColor:'#c47f17',backgroundColor:'rgba(196,127,23,0.1)',pointBackgroundColor:'#c47f17',borderDash:[5,4],borderWidth:2});
+  if(ms) datasets.push({label:'MAS',data:[ms.att.mean/6*15,ms.esc.mean/6*15,ms.sen.mean/6*15,0,ms.tan.mean/6*15],borderColor:'#0e7490',backgroundColor:'rgba(14,116,144,0.1)',pointBackgroundColor:'#0e7490',borderDash:[3,3],borderWidth:2});
+
+  killChart(cid);
+  setTimeout(()=>{
+    charts[cid]=new Chart(document.getElementById(cid),{type:'radar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{ticks:{display:false},grid:{color:'rgba(0,0,0,0.08)'},pointLabels:{color:'#4a5568',font:{size:12}},suggestedMin:0,suggestedMax:15}}}});
+  },100);
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════════
+// NARRATIVE (rule-based, no PHI, all tools, all behaviors)
+// ═══════════════════════════════════════════════════════════
+function buildNarrative(allResults,staff,dateStr){
+  const parts=[];
+  const toolList=[activeTools.qabf&&'the Questions About Behavioral Function (QABF)',activeTools.fast&&'the Functional Analysis Screening Tool (FAST)',activeTools.mas&&'the Motivation Assessment Scale (MAS)'].filter(Boolean);
+  const toolStr=toolList.length===1?toolList[0]:toolList.slice(0,-1).join(', ')+' and '+toolList[toolList.length-1];
+  const nTools=toolList.length;
+  const nBehs=allResults.length;
+  const datePhrase=dateStr?` on ${dateStr}`:'';
+  const behNames=allResults.map(r=>r.label);
+
+  // Para 1: overview
+  parts.push(
+    `A functional behavior assessment was conducted${datePhrase} to identify the environmental and physiological variables maintaining ${nBehs===1?`the target behavior (${behNames[0]})`:nBehs===2?`two target behaviors (${behNames[0]} and ${behNames[1]})`:'the identified target behaviors'}. ` +
+    `${nTools>1?'Multiple indirect assessment measures were administered':'An indirect assessment measure was administered'} to ${staff}: ${toolStr}. ` +
+    (activeTools.qabf?'The QABF is a 25-item informant rating scale scored 0 (Never) to 3 (Often), yielding subscale totals across five functional domains: Attention, Escape, Non-social, Physical, and Tangible, with a maximum subscale score of 15. ':'') +
+    (activeTools.fast?'The FAST is a 16-item Yes/No/N/A screener organized across four categories — Social Reinforcement (Attention/Preferred Items), Escape, Sensory Stimulation, and Pain Attenuation — designed to identify environmental and physical factors that may influence problem behavior. ':'') +
+    (activeTools.mas?'The MAS is a 16-item rating scale scored 0 (Never) to 6 (Always) yielding mean scores across four functional categories: Sensory, Escape, Attention, and Tangible, with higher mean scores indicating greater informant-reported association between the behavior and that functional category. ':'') +
+    (nTools>1?'Results across measures were reviewed together to identify convergent patterns and strengthen the functional hypothesis.':'Results were reviewed to identify the most likely behavioral function.')
+  );
+
+  // One block per behavior
+  allResults.forEach((r,ri)=>{
+    const {label,qs,fs,ms}=r;
+    const behRef=nBehs>1?`${label}`:'the target behavior';
+
+    // QABF paragraph
+    if(qs){
+      const qKeys=['att','esc','non','phy','tan'];
+      const sorted=[...qKeys].sort((a,b)=>qs[b]-qs[a]);
+      const maxQ=qs[sorted[0]];
+      const doms=sorted.filter(k=>qs[k]===maxQ);
+      const domNames=doms.map(k=>CM[k].lbl).join(' and ');
+      const allScores=qKeys.map(k=>`${CM[k].lbl}: ${qs[k]}/15`).join(', ');
+      const pct=Math.round(maxQ/15*100);
+      const fnDesc=doms.map(k=>({att:'social attention and caregiver responsiveness',esc:'escape from or avoidance of demands and tasks',non:'automatic reinforcement through sensory stimulation',phy:'pain attenuation or relief from physical discomfort',tan:'access to tangible items or preferred activities'}[k])).join(' and/or ');
+      let interp='';
+      if(maxQ<=3) interp=`These scores are low across all subscales and do not strongly implicate a specific behavioral function based on informant report for ${behRef}.`;
+      else if(maxQ<=7) interp=`The ${domNames} subscale${doms.length>1?'s':''} yielded the highest score${doms.length>1?'s':''} (${maxQ}/15), suggesting a possible but not definitive role of ${fnDesc} in maintaining ${behRef}.`;
+      else if(maxQ<=11) interp=`The ${domNames} subscale${doms.length>1?'s':''} yielded elevated scores (${maxQ}/15, ${pct}%), indicating moderate informant-reported likelihood that ${behRef} is maintained by ${fnDesc}.`;
+      else interp=`The ${domNames} subscale${doms.length>1?'s':''} yielded highly elevated scores (${maxQ}/15, ${pct}%), providing strong informant-reported evidence that ${behRef} is likely maintained by ${fnDesc}.`;
+      const sec=sorted[1];
+      const secNote=(qs[sec]>=5&&qs[sec]!==maxQ)?` The ${CM[sec].lbl} subscale also yielded a notable score of ${qs[sec]}/15 and may represent a secondary or co-occurring function worth further investigation.`:'';
+      parts.push(`QABF results${nBehs>1?` for ${label}`:''}indicated the following subscale scores: ${allScores}. ${interp}${secNote}`);
+    }
+
+    // FAST paragraph
+    if(fs){
+      const fKeys=['soc','esc','auto','pain'];
+      const sorted=[...fKeys].sort((a,b)=>fs[b]-fs[a]);
+      const maxF=fs[sorted[0]];
+      const doms=sorted.filter(k=>fs[k]===maxF);
+      const domNames=doms.map(k=>CM[k].lbl).join(' and ');
+      const allScores=fKeys.map(k=>`${FAST_FULL[k]}: ${fs[k]}/4`).join('; ');
+      const fnDesc=doms.map(k=>({soc:'social reinforcement via attention and access to preferred items',esc:'escape or avoidance of task demands',auto:'automatic reinforcement of a sensory nature',pain:'physical discomfort or pain-related variables'}[k])).join(' and/or ');
+      let interp='';
+      if(maxF===0) interp=`No items were endorsed, suggesting the informant did not identify environmental or physical factors consistent with any specific behavioral function for ${behRef} at this time.`;
+      else if(maxF===1) interp=`The ${domNames} category received the highest score (${maxF}/4), though endorsement was minimal and should be interpreted cautiously.`;
+      else if(maxF===2) interp=`The ${domNames} category received a score of ${maxF}/4, indicating moderate informant endorsement of ${fnDesc} as a potential maintaining variable for ${behRef}.`;
+      else if(maxF===3) interp=`The ${domNames} category received a score of ${maxF}/4, reflecting strong informant endorsement that ${fnDesc} may significantly contribute to the maintenance of ${behRef}.`;
+      else interp=`The ${domNames} category received a perfect score of 4/4, indicating full informant endorsement across all items in that category and providing compelling screening-level evidence that ${behRef} is maintained by ${fnDesc}.`;
+      parts.push(`FAST results${nBehs>1?` for ${label}`:''}were as follows: ${allScores}. ${interp}`);
+    }
+
+    // MAS paragraph
+    if(ms){
+      const mKeys=['sen','esc','att','tan'];
+      const sorted=[...mKeys].sort((a,b)=>ms[b].mean-ms[a].mean);
+      const topK=sorted[0];const topMean=ms[topK].mean;
+      const doms=sorted.filter(k=>ms[k].mean===topMean);
+      const domNames=doms.map(k=>MAS_FULL[k]).join(' and ');
+      const allScores=mKeys.map(k=>`${MAS_FULL[k]}: mean ${ms[k].mean.toFixed(2)}/6 (sum ${ms[k].sum}/24)`).join('; ');
+      const fnDesc=doms.map(k=>({sen:'automatic sensory reinforcement',esc:'escape from or avoidance of aversive situations',att:'social attention and caregiver interaction',tan:'access to tangible items or preferred activities'}[k])).join(' and/or ');
+      let interp='';
+      if(topMean<1.5) interp=`Mean scores were low across all categories, and no single function was strongly endorsed by the informant.`;
+      else if(topMean<3) interp=`The ${domNames} category yielded the highest mean score (${topMean.toFixed(2)}/6), suggesting a possible but moderate association with ${fnDesc} for ${behRef}.`;
+      else if(topMean<4.5) interp=`The ${domNames} category yielded an elevated mean score (${topMean.toFixed(2)}/6), indicating a likely association between ${behRef} and ${fnDesc}.`;
+      else interp=`The ${domNames} category yielded a high mean score (${topMean.toFixed(2)}/6), providing strong informant-reported evidence that ${behRef} is associated with ${fnDesc}.`;
+      parts.push(`MAS results${nBehs>1?` for ${label}`:''}were as follows: ${allScores}. ${interp}`);
+    }
+  });
+
+  // Convergence / hypothesis paragraph(s)
+  allResults.forEach((r,ri)=>{
+    const {label,qs,fs,ms}=r;
+    const behRef=nBehs>1?label:'the target behavior';
+    const toolsUsed=[qs&&'qabf',fs&&'fast',ms&&'mas'].filter(Boolean);
+    if(toolsUsed.length<2) return; // single-tool, skip convergence
+
+    // Find top function per tool and map to common axis
+    const fnMap={att:'attention',esc:'escape',non:'sensory',phy:'physical',tan:'tangible',soc:'attention',auto:'sensory',pain:'physical',sen:'sensory'};
+    const tops=[];
+    if(qs){const qKeys=['att','esc','non','phy','tan'];const top=[...qKeys].sort((a,b)=>qs[b]-qs[a])[0];tops.push({tool:'QABF',cat:top,mapped:fnMap[top],lbl:CM[top].lbl});}
+    if(fs){const fKeys=['soc','esc','auto','pain'];const top=[...fKeys].sort((a,b)=>fs[b]-fs[a])[0];tops.push({tool:'FAST',cat:top,mapped:fnMap[top],lbl:CM[top].lbl});}
+    if(ms){const mKeys=['sen','esc','att','tan'];const top=[...mKeys].sort((a,b)=>ms[b].mean-ms[a].mean)[0];tops.push({tool:'MAS',cat:top,mapped:fnMap[top],lbl:MAS_FULL[top]});}
+
+    const mappedFns=[...new Set(tops.map(t=>t.mapped))];
+    const isConvergent=mappedFns.length===1;
+    const topFn=tops[0].mapped;
+
+    const fnLongDesc={attention:'social attention-based reinforcement',escape:'escape from or avoidance of aversive demands',sensory:'automatic reinforcement driven by sensory stimulation',physical:'pain attenuation or physiological discomfort',tangible:'access to tangible items or preferred activities'};
+
+    if(isConvergent){
+      parts.push(
+        `Results across ${tops.map(t=>t.tool).join(', ')} converged on ${fnLongDesc[topFn]} as the most likely maintaining variable for ${behRef}. ` +
+        `Cross-measure agreement strengthens confidence in this hypothesis. ` +
+        `Recommended intervention strategies include antecedent modifications targeting the relevant motivating operations, differential reinforcement of functionally equivalent alternative behaviors (e.g., FCT), and extinction of the identified reinforcement pathway. ` +
+        `These findings should be validated through systematic direct observation prior to finalizing the behavior intervention plan.`
+      );
+    } else {
+      const topsByTool=tops.map(t=>`${t.tool}: ${t.lbl}`).join('; ');
+      parts.push(
+        `Results across tools did not fully converge for ${behRef} (${topsByTool}). ` +
+        `This divergence may reflect differences in item specificity, rater interpretation, or the presence of multiple maintaining variables. ` +
+        `A hypothesis of multiple or complex behavioral function should be considered. ` +
+        `It is recommended that direct observational assessment and, if clinically indicated, a systematic experimental functional analysis be conducted to clarify maintaining contingencies prior to finalizing the behavior intervention plan.`
+      );
+    }
+  });
+
+  // Cross-behavior note if two behaviors
+  if(nBehs===2&&allResults.every(r=>r.qs||r.fs||r.ms)){
+    const b1=allResults[0];const b2=allResults[1];
+    const getTop=(r)=>{
+      if(r.qs){const qKeys=['att','esc','non','phy','tan'];return {lbl:CM[[...qKeys].sort((a,b)=>r.qs[b]-r.qs[a])[0]].lbl};}
+      if(r.fs){const fKeys=['soc','esc','auto','pain'];return {lbl:CM[[...fKeys].sort((a,b)=>r.fs[b]-r.fs[a])[0]].lbl};}
+      if(r.ms){const mKeys=['sen','esc','att','tan'];return {lbl:MAS_FULL[[...mKeys].sort((a,b)=>r.ms[b].mean-r.ms[a].mean)[0]]};} return null;
+    };
+    const t1=getTop(b1);const t2=getTop(b2);
+    if(t1&&t2){
+      if(t1.lbl===t2.lbl){
+        parts.push(`Notably, both ${b1.label} and ${b2.label} appear to share a common hypothesized function (${t1.lbl}), suggesting that a unified or coordinated intervention approach may be appropriate. The behavior intervention plan should address shared antecedent conditions and reinforcement contingencies across both behaviors.`);
+      } else {
+        parts.push(`${b1.label} and ${b2.label} appear to be maintained by different functional mechanisms (${t1.lbl} and ${t2.lbl}, respectively). Separate intervention strategies may be warranted for each behavior, and the interaction between the two behaviors should be considered during treatment planning.`);
+      }
+    }
+  }
+
+  document.getElementById('narrative-box').textContent=parts.join('\n\n');
+}
+
+// ═══════════════════════════════════════════════════════════
+// COPY / EXPORT
+// ═══════════════════════════════════════════════════════════
+function copyNarrative(){
+  const text=document.getElementById('narrative-box').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('btn-copy-narr');
+    const orig=btn.innerHTML;btn.classList.add('ok');btn.innerHTML=btn.innerHTML.replace(/Copy narrative/,'Copied!');
+    setTimeout(()=>{btn.classList.remove('ok');btn.innerHTML=orig;},2200);
+  });
+}
+
+function copyAllText(){
+  const beh1=document.getElementById('inp-beh1').value||'Behavior 1';
+  const beh2=document.getElementById('inp-beh2').value||'Behavior 2';
+  const dateVal=document.getElementById('inp-date').value;
+  const dateStr=dateVal?new Date(dateVal+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+  const toolList=[activeTools.qabf&&'QABF',activeTools.fast&&'FAST',activeTools.mas&&'MAS'].filter(Boolean).join(', ');
+  let lines=[];
+  lines.push('BEHAVIORAL FUNCTION ASSESSMENT RESULTS');lines.push('═══════════════════════════════════════');
+  lines.push(`Tools: ${toolList}`);
+  lines.push(`Behavior${behaviorCount>1?'s':''}: ${beh1}${behaviorCount>1?' | '+beh2:''}`);
+  if(dateStr) lines.push(`Date: ${dateStr}`);lines.push('');
+
+  for(let bi=0;bi<behaviorCount;bi++){
+    const label=bi===0?beh1:beh2;
+    if(behaviorCount>1){lines.push(`── ${label} ──`);lines.push('');}
+    if(activeTools.qabf){
+      const qs=calcQABF(bi);
+      lines.push('QABF Scores (0–15 per function):');
+      ['att','esc','non','phy','tan'].forEach(k=>lines.push(`  ${CM[k].lbl}: ${qs[k]}/15`));lines.push('');
+    }
+    if(activeTools.fast){
+      const fs=calcFAST(bi);
+      lines.push('FAST Scores (Yes answers, 0–4 per category):');
+      ['soc','esc','auto','pain'].forEach(k=>lines.push(`  ${FAST_FULL[k]}: ${fs[k]}/4`));lines.push('');
+    }
+    if(activeTools.mas){
+      const ms=calcMAS(bi);
+      lines.push('MAS Scores (mean 0–6 per function):');
+      ['sen','esc','att','tan'].forEach(k=>lines.push(`  ${MAS_FULL[k]}: mean ${ms[k].mean.toFixed(2)} (sum ${ms[k].sum}/24)`));lines.push('');
+    }
+  }
+  const narr=document.getElementById('narrative-box').textContent;
+  if(narr){lines.push('WRITTEN SUMMARY:');lines.push('───────────────');lines.push(narr);}
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
+    const btn=document.getElementById('btn-copy-all');
+    const orig=btn.innerHTML;btn.classList.add('ok');btn.innerHTML=btn.innerHTML.replace(/Copy all results text/,'Copied!');
+    setTimeout(()=>{btn.classList.remove('ok');btn.innerHTML=orig;},2200);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════════
+function resetAll(){
+  scores=[{qabf:{},fast:{},mas:{}},{qabf:{},fast:{},mas:{}}];
+  document.getElementById('results').style.display='none';
+  ['inp-client','inp-beh1','inp-beh2','inp-staff'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('inp-date').value='';
+  currentBehTab=0;
+  renderForms(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+renderForms(0);
+</script>
+</body>
+</html>
